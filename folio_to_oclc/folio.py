@@ -40,9 +40,8 @@ class Folio:
 
     def get_updated_instances(self, updated_date):
         path = "/inventory/instances"
-        date = "2022-01-10"
         status_id_oclc = self.config.get('Folio', 'instance_status_oclc')
-        params = f'?query=(statusUpdatedDate=={date}* and statusId="{status_id_oclc}")'
+        params = f'?query=(statusUpdatedDate=={updated_date}* and statusId="{status_id_oclc}")'
         result = self.client.folio_get(path, query = params)
         instances = result['instances']
         return instances
