@@ -1,4 +1,8 @@
+import configparser
 import logging
+
+from folio import Folio
+from oclc import Oclc
 
 logging.basicConfig()
 log = logging.getLogger("FolioHoldingsToOclc")
@@ -7,23 +11,11 @@ log.setLevel(logging.DEBUG)
 class FolioHoldingsToOclc:
     """ Get recent holdings from FOLIO and submit them to OCLC. """
 
-    class Folio:
-        """ Get updated holdings via the FOLIO API. """
+    def __init__(self):
+        self.config = configparser.ConfigParser()
+        self.config.read('test.properties')
 
-        def __init__(self):
-            pass
-
-        def get_updated_holdings(self, updated_date):
-            pass
-
-    class Oclc:
-        """ Submit updated holdings via the OCLC API. """
-
-        def __init__(self):
-            pass
-
-        def submit_holdings(self, holdingsIds):
-            pass
+        self.folio = Folio(self.config)
 
     def get_yesterday(self):
         pass
@@ -35,13 +27,13 @@ class FolioHoldingsToOclc:
         yesterday = self.get_yesterday()
 
         # Get from FOLIO the list of updated holdings.
-        folio = self.Folio()
-        holdings = folio.get_updated_holdings(yesterday)
+        holdings = self.folio.get_updated_instance_oclc_numbers(yesterday)
 
         # Submit those to OCLC.
-        oclc = self.Oclc()
+        oclc = Oclc()
         oclc.submit_holdings(holdings)
 
         log.debug("Finished running yesterday's holdings")
 
-FolioHoldingsToOclc().run_yesterdays_holdings()
+holdings_to_oclc = FolioHoldingsToOclc()
+holdings_to_oclc.run_yesterdays_holdings()
