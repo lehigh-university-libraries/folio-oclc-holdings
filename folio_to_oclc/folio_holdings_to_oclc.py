@@ -1,6 +1,8 @@
+import argparse
 import configparser
 import logging
 from datetime import date, timedelta
+from os.path import exists
 
 from folio import Folio
 from oclc import Oclc
@@ -15,13 +17,18 @@ class FolioHoldingsToOclc:
     """ Get recent holdings from FOLIO and submit them to OCLC. """
 
     def __init__(self):
+        parser = argparse.ArgumentParser(description="Set or delete FOLIO holdings in OCLC.")
+        parser.add_argument('-c, --config', dest='config_file', help='path to the properties file', default="test.properties")
+        args = parser.parse_args()
+
         self.config = configparser.ConfigParser()
-        self.config.read('test.properties')
+        if not exists(args.config_file):
+            raise FileNotFoundError(f"Cannot find config file: {args.config_file}")
+        self.config.read(args.config_file)
 
+        log.info(f"Initilalized with config file {args.config_file}")
         # Note: Config contains the wskey and secret.  Consider logging destinations.
-        # log.debug("Inititlized with config: ", {section: dict(self.config[section]) for section in self.config.sections()})
-
-        self.folio = Folio(self.config)
+        # log.debug("Config: ", {section: dict(self.config[section]) for section in self.config.sections()})
 
     def run_yesterdays_holdings(self):
         log.debug("Running yesterday's holdings")
@@ -34,11 +41,12 @@ class FolioHoldingsToOclc:
         test_oclc_nums = self.config.get("Testing", "test_oclc_nums", fallback=None)
         if test_oclc_nums:
             # TESTING PURPOSES: Ignore FOLIO and use these numbers instead.
-            log.warn("Using TEST OCLC numbers: " + test_oclc_nums)
+            log.warning("Using TEST OCLC numbers: " + test_oclc_nums)
             oclc_nums = [OclcNumber(num.strip(',')) for num in test_oclc_nums.split(" ")]
 
         else:
             # Get from FOLIO the list of updated holdings.
+            self.folio = Folio(self.config)
             oclc_nums = self.folio.get_updated_instance_oclc_numbers(date)
 
         # Submit those to OCLC.
