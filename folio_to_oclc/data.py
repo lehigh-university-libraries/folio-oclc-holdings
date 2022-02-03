@@ -11,3 +11,6 @@ class OclcNumber:
     
     def __repr__(self):
         return self.numeric
+
+class FolioOclcHoldingsError(Exception):
+    pass
