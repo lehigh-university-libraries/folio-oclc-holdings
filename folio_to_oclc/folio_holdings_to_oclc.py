@@ -16,17 +16,13 @@ log.setLevel(logging.DEBUG)
 class FolioHoldingsToOclc:
     """ Get recent holdings from FOLIO and submit them to OCLC. """
 
-    def __init__(self):
-        parser = argparse.ArgumentParser(description="Set or delete FOLIO holdings in OCLC.")
-        parser.add_argument('-c, --config', dest='config_file', help='path to the properties file', default="test.properties")
-        args = parser.parse_args()
+    def __init__(self, config_file):
+        if not exists(config_file):
+            raise FileNotFoundError(f"Cannot find config file: {config_file}")
 
         self.config = configparser.ConfigParser()
-        if not exists(args.config_file):
-            raise FileNotFoundError(f"Cannot find config file: {args.config_file}")
-        self.config.read(args.config_file)
-
-        log.info(f"Initilalized with config file {args.config_file}")
+        self.config.read(config_file)
+        log.info(f"Initilalized with config file {config_file}")
         # Note: Config contains the wskey and secret.  Consider logging destinations.
         # log.debug("Config: ", {section: dict(self.config[section]) for section in self.config.sections()})
 
@@ -58,7 +54,15 @@ class FolioHoldingsToOclc:
 
         log.debug("Finished setting or deleting holdings data.")
 
-holdings_to_oclc = FolioHoldingsToOclc()
-# holdings_to_oclc.run_yesterdays_holdings()
-# TESTING PURPOSES: 
-holdings_to_oclc.run_holdings_for_date("2022-01-10")
+def main():
+    parser = argparse.ArgumentParser(description="Set or delete FOLIO holdings in OCLC.")
+    parser.add_argument('-c, --config', dest='config_file', help='path to the properties file', default="test.properties")
+    args = parser.parse_args()
+
+    holdings_to_oclc = FolioHoldingsToOclc(args.config_file)
+    # holdings_to_oclc.run_yesterdays_holdings()
+    # TESTING PURPOSES: 
+    holdings_to_oclc.run_holdings_for_date("2022-01-10")
+
+if __name__ == '__main__':
+    main()
