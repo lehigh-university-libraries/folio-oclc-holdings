@@ -4,7 +4,7 @@ from requests.auth import HTTPBasicAuth
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
 
-from data import FolioOclcHoldingsError
+from data import FolioOclcHoldingsError, Record
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
@@ -47,39 +47,49 @@ class Oclc:
 
         return session
 
-    def check_holding(self, oclc_num):
+    def check_holding(self, oclc_number: str):
         """ Check holding status of a single OCLC number. """
-        url = f"{Oclc.SERVICE_URL}/ih/checkholdings?oclcNumber={oclc_num}";
+        url = f"{Oclc.SERVICE_URL}/ih/checkholdings?oclcNumber={oclc_number}";
         response = self._session.get(url, headers=Oclc.HEADER_ACCEPT_JSON)
         if response.status_code == 404:
-            log.info(f"OCLC number was not found: {oclc_num}")
+            log.info(f"Record was not found in OCLC: {oclc_number}")
             return False
         else:
             response.raise_for_status()
         result = response.json()
         is_holding_set = result['isHoldingSet']
-        log.debug(f"Checked holdings for {oclc_num}: {is_holding_set}; response: {result}")
+        log.debug(f"Checked holdings for {oclc_number}: {is_holding_set}; response: {result}")
         return is_holding_set
 
-    def set_holding(self, oclc_num):
+    def update_holding(self, record: Record):
+        match record.instance_status:
+            case Record.InstanceStatus.OCLC:
+                self.set_holding(record.oclc_number)
+            case Record.InstanceStatus.NO_OCLC:
+                self.delete_holding(record.oclc_number)
+            case _:
+                log.error(f"Skipped record with unknown status: {record}")
+
+
+    def set_holding(self, oclc_number: str):
         """ Set an institution holding for a single OCLC number. """
 
         # Skip the submit if the holding is already registered
-        if self.check_holding(oclc_num):
-            log.info(f"OCLC num already registered: {oclc_num}")
+        if self.check_holding(oclc_number):
+            log.info(f"OCLC num already registered: {oclc_number}")
             return
 
-        url = f"{Oclc.SERVICE_URL}/ih/data?oclcNumber={oclc_num}"
+        url = f"{Oclc.SERVICE_URL}/ih/data?oclcNumber={oclc_number}"
         response = self._session.post(url, headers=Oclc.HEADER_ACCEPT_JSON) 
         response.raise_for_status()
-        log.info(f"Set holding for item {oclc_num}")
+        log.info(f"Set holding for item {oclc_number}")
         log.debug(f"OCLC response status: {response.status_code}")
 
-    def delete_holding(self, oclc_num):
+    def delete_holding(self, oclc_number: str):
         """ Delete an institution holding for a single OCLC number. """
 
-        url = f"{Oclc.SERVICE_URL}/ih/data?oclcNumber={oclc_num}&cascade=0"
+        url = f"{Oclc.SERVICE_URL}/ih/data?oclcNumber={oclc_number}&cascade=0"
         response = self._session.delete(url, headers=Oclc.HEADER_ACCEPT_JSON) 
         response.raise_for_status()
-        log.info(f"Deleted holding for item {oclc_num}")
+        log.info(f"Deleted holding for item {oclc_number}")
         log.debug(f"OCLC response status: {response.status_code}")

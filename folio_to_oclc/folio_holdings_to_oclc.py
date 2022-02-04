@@ -7,7 +7,7 @@ from os.path import exists
 from folio import Folio
 from oclc import Oclc
 
-from data import OclcNumber
+from data import Record
 
 logging.basicConfig()
 log = logging.getLogger(__name__)
@@ -42,25 +42,34 @@ class FolioHoldingsToOclc:
     def run_holdings_for_date(self, date):
         log.debug("Running holdings for date: " + str(date))
 
-        test_oclc_nums = self.config.get("Testing", "test_oclc_nums", fallback=None)
-        if test_oclc_nums:
-            # TESTING PURPOSES: Ignore FOLIO and use these numbers instead.
-            log.warning("Using TEST OCLC numbers: " + test_oclc_nums)
-            oclc_nums = [OclcNumber(num.strip(',')) for num in test_oclc_nums.split(" ")]
-
+        test_records = self._load_test_records()
+        if test_records:
+            records = test_records
         else:
             # Get from FOLIO the list of updated holdings.
+            log.debug("Using FOLIO")
             self.folio = Folio(self.config)
-            oclc_nums = self.folio.get_updated_instance_oclc_numbers(date)
+            records = self.folio.get_updated_records(date)
 
         # Submit those to OCLC.
         oclc = Oclc(self.config)
-        for oclc_num in oclc_nums:
-            # Testing purposes: Set and then delete the holding.
-            oclc.set_holding(oclc_num)
-            oclc.delete_holding(oclc_num)
+        for record in records:
+            oclc.update_holding(record)
+        log.debug("Finished setting and/or deleting holdings data.")
 
-        log.debug("Finished setting or deleting holdings data.")
+    def _load_test_records(self):
+        records = []
+        test_oclc_nums_to_set = self.config.get("Testing", "test_records_to_set", fallback=None)
+        test_oclc_nums_to_unset = self.config.get("Testing", "test_records_to_unset", fallback=None)
+        if test_oclc_nums_to_set or test_oclc_nums_to_unset:
+            # TESTING PURPOSES: Ignore FOLIO and use these numbers instead.
+            if test_oclc_nums_to_set:
+                log.warning("Using TEST OCLC numbers to SET: " + test_oclc_nums_to_set)
+                records.extend([Record(num.strip(','), Record.InstanceStatus.OCLC) for num in test_oclc_nums_to_set.split(" ")])
+            if test_oclc_nums_to_unset:
+                log.warning("Using TEST OCLC numbers to UNSET: " + test_oclc_nums_to_unset)
+                records.extend([Record(num.strip(','), Record.InstanceStatus.NO_OCLC) for num in test_oclc_nums_to_unset.split(" ")])
+        return records if len(records) else None
 
 def main():
     parser = argparse.ArgumentParser(description="Set or delete FOLIO holdings in OCLC.")
