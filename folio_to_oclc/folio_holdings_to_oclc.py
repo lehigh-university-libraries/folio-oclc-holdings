@@ -10,7 +10,7 @@ from oclc import Oclc
 from data import OclcNumber
 
 logging.basicConfig()
-log = logging.getLogger("FolioHoldingsToOclc")
+log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
 class FolioHoldingsToOclc:
@@ -22,9 +22,17 @@ class FolioHoldingsToOclc:
 
         self.config = configparser.ConfigParser()
         self.config.read(config_file)
+        self._init_log()
         log.info(f"Initilalized with config file {config_file}")
         # Note: Config contains the wskey and secret.  Consider logging destinations.
         # log.debug("Config: ", {section: dict(self.config[section]) for section in self.config.sections()})
+
+    def _init_log(self):
+        log_file = self.config.get("Logging", "log_file", fallback=None)
+        if log_file:
+            self.config.log_file_handler = logging.FileHandler(filename=log_file)
+            self.config.log_file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+            log.addHandler(self.config.log_file_handler)
 
     def run_yesterdays_holdings(self):
         log.debug("Running yesterday's holdings")

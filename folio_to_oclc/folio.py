@@ -3,7 +3,7 @@ from folioclient.FolioClient import FolioClient
 
 from data import OclcNumber
 
-log = logging.getLogger("Folio")
+log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
 class Folio:
@@ -11,6 +11,7 @@ class Folio:
 
     def __init__(self, config):
         self.config = config
+        log.addHandler(self.config.log_file_handler)
         self.connection = self._init_connection()
 
     def _init_connection(self):

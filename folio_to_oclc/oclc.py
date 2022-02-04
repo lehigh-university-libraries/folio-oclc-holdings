@@ -6,7 +6,7 @@ from oauthlib.oauth2 import BackendApplicationClient
 
 from data import FolioOclcHoldingsError
 
-log = logging.getLogger("Oclc")
+log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
 class Oclc:
@@ -19,6 +19,7 @@ class Oclc:
 
     def __init__(self, config):
         self._config = config
+        log.addHandler(self._config.log_file_handler)
         self._init_oclc_metadata()
         self._session = self._init_connection()
 
