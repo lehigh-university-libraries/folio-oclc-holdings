@@ -73,4 +73,7 @@ def main():
     holdings_to_oclc.run_holdings_for_date("2022-01-10")
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception:
+        log.exception("Caught exception.")
