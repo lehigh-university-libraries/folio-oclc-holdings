@@ -11,8 +11,8 @@ class Folio:
 
     def __init__(self, config):
         self._config = config
-        self._status_id_oclc = self._config.get('Folio', 'instance_status_oclc')
-        self._status_id_no_oclc = self._config.get('Folio', 'instance_status_no_oclc')
+        self._status_id_set = self._config.get('Folio', 'instance_status_set')
+        self._status_id_withdrawn = self._config.get('Folio', 'instance_status_withdrawn')
         log.addHandler(self._config.log_file_handler)
         self.connection = self._init_connection()
 
@@ -33,10 +33,10 @@ class Folio:
         for instance in instances:
             for identifier in instance['identifiers']:
                 if identifier['identifierTypeId'] == OCLC_ID_TYPE:
-                    if instance['statusId'] == self._status_id_oclc:
-                        record = Record(oclc_number=identifier['value'], instance_status=Record.InstanceStatus.OCLC)
-                    elif instance['statusId'] == self._status_id_no_oclc:
-                        record = Record(oclc_number=identifier['value'], instance_status=Record.InstanceStatus.NO_OCLC)
+                    if instance['statusId'] == self._status_id_set:
+                        record = Record(oclc_number=identifier['value'], instance_status=Record.InstanceStatus.SET)
+                    elif instance['statusId'] == self._status_id_withdrawn:
+                        record = Record(oclc_number=identifier['value'], instance_status=Record.InstanceStatus.WITHDRAWN)
                     else:
                         log.debug(f"Skipping updated record {identifier['value']} with unhandled instance status type {instance['statusId']}.")
                         break

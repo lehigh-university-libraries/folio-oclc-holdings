@@ -3,8 +3,8 @@ from enum import Enum
 class Record:
 
     class InstanceStatus(Enum):
-        OCLC = 0
-        NO_OCLC = 1
+        SET = 0
+        WITHDRAWN = 1
 
     def __init__(self, oclc_number, instance_status):
         self._raw_oclc_number = oclc_number
