@@ -65,10 +65,10 @@ class FolioHoldingsToOclc:
             # TESTING PURPOSES: Ignore FOLIO and use these numbers instead.
             if test_oclc_nums_to_set:
                 log.warning("Using TEST OCLC numbers to SET: " + test_oclc_nums_to_set)
-                records.extend([Record(num.strip(','), Record.InstanceStatus.OCLC) for num in test_oclc_nums_to_set.split(" ")])
+                records.extend([Record(num.strip(','), Record.InstanceStatus.SET) for num in test_oclc_nums_to_set.split(" ")])
             if test_oclc_nums_to_unset:
                 log.warning("Using TEST OCLC numbers to UNSET: " + test_oclc_nums_to_unset)
-                records.extend([Record(num.strip(','), Record.InstanceStatus.NO_OCLC) for num in test_oclc_nums_to_unset.split(" ")])
+                records.extend([Record(num.strip(','), Record.InstanceStatus.WITHDRAWN) for num in test_oclc_nums_to_unset.split(" ")])
         return records if len(records) else None
 
 def main():

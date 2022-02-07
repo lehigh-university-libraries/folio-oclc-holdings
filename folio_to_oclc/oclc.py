@@ -63,9 +63,9 @@ class Oclc:
 
     def update_holding(self, record: Record):
         match record.instance_status:
-            case Record.InstanceStatus.OCLC:
+            case Record.InstanceStatus.SET:
                 self.set_holding(record.oclc_number)
-            case Record.InstanceStatus.NO_OCLC:
+            case Record.InstanceStatus.WITHDRAWN:
                 self.delete_holding(record.oclc_number)
             case _:
                 log.error(f"Skipped record with unknown status: {record}")
