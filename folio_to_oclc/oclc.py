@@ -80,14 +80,13 @@ class Oclc:
 
         url = f"{Oclc.SERVICE_URL}/ih/data?oclcNumber={oclc_number}"
         response = self._session.post(url, headers=Oclc.HEADER_ACCEPT_JSON) 
-        response.raise_for_status()
         log.debug(f"OCLC response status: {response.status_code}")
         if response.status_code == 201:
             return self._result(operation=HoldingUpdateResult.Operation.SET, success=True, 
                 message=f"Set holding for item {oclc_number}")
         else:
             return self._result(operation=HoldingUpdateResult.Operation.SET, success=False, 
-                message=f"Unexpected status code: {response.status_code}")                        
+                message=f"Unexpected status code: {response.status_code} when setting oclc_number {oclc_number}")                        
 
 
     def delete_holding(self, oclc_number: str):
@@ -100,10 +99,13 @@ class Oclc:
 
         url = f"{Oclc.SERVICE_URL}/ih/data?oclcNumber={oclc_number}&cascade=0"
         response = self._session.delete(url, headers=Oclc.HEADER_ACCEPT_JSON) 
-        response.raise_for_status()
         log.debug(f"OCLC response status: {response.status_code}")
-        return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=True, 
-            message=f"Deleted holding for item {oclc_number}")
+        if response.status_code == 200:
+            return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=True, 
+                message=f"Deleted holding for item {oclc_number}")
+        else:
+            return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=False,
+                message=f"Unexpected status code: {response.status_code} when withdrawing oclc_number {oclc_number}")                        
 
     def _result(self, operation, success, message):
         result = HoldingUpdateResult(operation, success, message)
