@@ -19,5 +19,19 @@ class Record:
     def __repr__(self):
         return f"{self.oclc_number} ({self.instance_status})"
 
+class HoldingUpdateResult:
+
+    class Operation(Enum):
+        SET = 0
+        WITHDRAW = 1
+
+    def __init__(self, operation: Operation, success: bool, message: str):
+        self.operation = operation
+        self.success = success
+        self.message = message
+
+    def __repr__(self):
+        return self.message
+
 class FolioOclcHoldingsError(Exception):
     pass

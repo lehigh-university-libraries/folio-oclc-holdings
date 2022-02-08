@@ -6,6 +6,7 @@ from os.path import exists
 
 from folio import Folio
 from oclc import Oclc
+from emailer import Emailer
 
 from data import Record
 
@@ -25,7 +26,8 @@ class FolioHoldingsToOclc:
         self._init_log()
         log.info(f"Initilalized with config file {config_file}")
         # Note: Config contains the wskey and secret.  Consider logging destinations.
-        # log.debug("Config: ", {section: dict(self.config[section]) for section in self.config.sections()})
+        # print("Config: ", {section: dict(self.config[section]) for section in self.config.sections()})
+        self._emailer = Emailer(self.config)
 
     def _init_log(self):
         log_file = self.config.get("Logging", "log_file", fallback=None)
@@ -52,10 +54,14 @@ class FolioHoldingsToOclc:
             records = self.folio.get_updated_records(date)
 
         # Submit those to OCLC.
+        results = []
         oclc = Oclc(self.config)
         for record in records:
-            oclc.update_holding(record)
+            result = oclc.update_holding(record)
+            results.append(result)
         log.debug("Finished setting and/or deleting holdings data.")
+        log.info(f"Results: {results}")
+        self._emailer.send_results(results)
 
     def _load_test_records(self):
         records = []
