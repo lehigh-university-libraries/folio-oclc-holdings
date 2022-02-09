@@ -93,7 +93,7 @@ class FolioHoldingsToOclc:
 
 def main():
     parser = argparse.ArgumentParser(description="Set or delete FOLIO holdings in OCLC.")
-    parser.add_argument('-c, --config', dest='config_file', help='path to the properties file', default="test.properties")
+    parser.add_argument('-c, --config', dest='config_file', required=True, help='path to the properties file')
     args = parser.parse_args()
 
     holdings_to_oclc = FolioHoldingsToOclc(args.config_file)
