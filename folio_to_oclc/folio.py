@@ -31,6 +31,8 @@ class Folio:
         OCLC_ID_TYPE = self._config.get('Folio', 'id_type_oclc')
         records = []
         for instance in instances:
+            if not 'statusId' in instance:
+                continue
             for identifier in instance['identifiers']:
                 if identifier['identifierTypeId'] == OCLC_ID_TYPE:
                     if instance['statusId'] == self._status_id_set:
@@ -49,6 +51,7 @@ class Folio:
             log.info(f"Found updated FOLIO records: {records}")
         else:
             log.info("No updated FOLIO records found")
+        return records
 
     def _api_get_updated_instances(self, updated_date):
         path = "/inventory/instances"
