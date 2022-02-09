@@ -35,6 +35,8 @@ class FolioHoldingsToOclc:
             self.config.log_file_handler = logging.FileHandler(filename=log_file)
             self.config.log_file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
             log.addHandler(self.config.log_file_handler)
+        else:
+            self.config.log_file_handler = logging.NullHandler()
 
     def run(self):
         """ Run a holdings update process.  Use yesterday's updated records, or test records if specified"""
