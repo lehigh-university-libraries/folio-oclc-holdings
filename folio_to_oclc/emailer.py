@@ -14,6 +14,7 @@ class Emailer:
     def __init__(self, config):
         self._smtp_host = config.get("Email", "smtp_host")
         self._from_address = config.get("Email", "from_address")
+        self._from_name = config.get("Email", "from_name")
         self._to_address = config.get("Email", "to_address")
 
     def send_results(self, results: list):
@@ -38,7 +39,7 @@ class Emailer:
             msg = EmailMessage()
             msg.set_content(message_body)
             msg['Subject'] = subject
-            msg['From'] = self._from_address
+            msg['From'] = f"{self._from_name} <{self._from_address}>" if self._from_name else self._from_address
             msg['To'] = self._to_address
 
             server.send_message(msg)
