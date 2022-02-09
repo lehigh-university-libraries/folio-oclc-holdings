@@ -69,25 +69,23 @@ class Oclc:
         else:
             log.error(f"Skipped record with unknown status: {record}")
 
-
     def set_holding(self, oclc_number: str):
         """ Set an institution holding for a single OCLC number. """
 
-        # Skip the submit if the holding is already registered
+        # Skip the submit if the holding is already set
         if self.check_holding(oclc_number):
             return self._result(operation=HoldingUpdateResult.Operation.SET, success=False, 
-                message=f"OCLC num already registered: {oclc_number}")   
+                message=f"Failed to set holdings for record  {oclc_number}. Holdings already set.")   
 
         url = f"{Oclc.SERVICE_URL}/ih/data?oclcNumber={oclc_number}"
         response = self._session.post(url, headers=Oclc.HEADER_ACCEPT_JSON) 
         log.debug(f"OCLC response status: {response.status_code}")
         if response.status_code == 201:
             return self._result(operation=HoldingUpdateResult.Operation.SET, success=True, 
-                message=f"Set holding for item {oclc_number}")
+                message=f"Holdings successfully set for record {oclc_number}")
         else:
             return self._result(operation=HoldingUpdateResult.Operation.SET, success=False, 
-                message=f"Unexpected status code: {response.status_code} when setting oclc_number {oclc_number}")                        
-
+                message=f"Failed to set holdings for record  {oclc_number}. Unexpected status code: {response.status_code}.")                        
 
     def delete_holding(self, oclc_number: str):
         """ Delete an institution holding for a single OCLC number. """
@@ -95,20 +93,21 @@ class Oclc:
         # Skip the submit if the holding is already unset
         if not self.check_holding(oclc_number):
             return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=False, 
-                message=f"OCLC num already not set: {oclc_number}")
+                message=f"Failed to delete holdings for record {oclc_number}. Holdings not set on record.")
 
         url = f"{Oclc.SERVICE_URL}/ih/data?oclcNumber={oclc_number}&cascade=0"
         response = self._session.delete(url, headers=Oclc.HEADER_ACCEPT_JSON) 
         log.debug(f"OCLC response status: {response.status_code}")
         if response.status_code == 200:
             return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=True, 
-                message=f"Deleted holding for item {oclc_number}")
+                message=f"Holdings successfully deleted for record {oclc_number}")
         elif response.status_code == 409:
             return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=False, 
-                message=f"Failed to delete holding for record {oclc_number} with status code {response.status_code}: possible LHR present")                        
+                message=f"Failed to delete holdings for record {oclc_number} with status code {response.status_code}. "\
+                    "Your institution may have one or more local holdings records linked to this record.")                        
         else:
             return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=False,
-                message=f"Unexpected status code: {response.status_code} when withdrawing oclc_number {oclc_number}")                        
+                message=f"Failed to delete holdings for record {oclc_number}. Unexpected status code:  {response.status_code}.")                        
 
     def _result(self, operation, success, message):
         result = HoldingUpdateResult(operation, success, message)
