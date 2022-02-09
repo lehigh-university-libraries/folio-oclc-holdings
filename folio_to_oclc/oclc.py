@@ -103,6 +103,9 @@ class Oclc:
         if response.status_code == 200:
             return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=True, 
                 message=f"Deleted holding for item {oclc_number}")
+        elif response.status_code == 409:
+            return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=False, 
+                message=f"Failed to delete holding for record {oclc_number} with status code {response.status_code}: possible LHR present")                        
         else:
             return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=False,
                 message=f"Unexpected status code: {response.status_code} when withdrawing oclc_number {oclc_number}")                        
