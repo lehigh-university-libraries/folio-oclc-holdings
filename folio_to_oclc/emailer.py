@@ -21,16 +21,16 @@ class Emailer:
         message_body = job_description
 
         successful_sets = self._filter_results(results, True, HoldingUpdateResult.Operation.SET)
-        message_body += self._format_results_message(successful_sets, "Successful Sets")
+        message_body += self._format_results_message(successful_sets, "Successfully Set")
 
         failed_sets = self._filter_results(results, False, HoldingUpdateResult.Operation.SET)
-        message_body += self._format_results_message(failed_sets, "Failed Sets")
+        message_body += self._format_results_message(failed_sets, "Failure to Set")
 
         successful_widthdraws = self._filter_results(results, True, HoldingUpdateResult.Operation.WITHDRAW)
-        message_body += self._format_results_message(successful_widthdraws, "Successful Withdraws")
+        message_body += self._format_results_message(successful_widthdraws, "Successfully Withdrawn")
 
         failed_widthdraws = self._filter_results(results, False, HoldingUpdateResult.Operation.WITHDRAW)
-        message_body += self._format_results_message(failed_widthdraws, "Failure Withdraws")
+        message_body += self._format_results_message(failed_widthdraws, "Failure to Withdraw")
 
         subject = f"Holdings to OCLC: {len(failed_sets) + len(failed_widthdraws)} failure(s) " \
             f"and {len(successful_sets) + len(successful_widthdraws)} success(es) at {datetime.now()}"
