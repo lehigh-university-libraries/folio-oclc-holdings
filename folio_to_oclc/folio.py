@@ -30,7 +30,9 @@ class Folio:
         instances = self._api_get_updated_instances(updated_date)
         OCLC_ID_TYPE = self._config.get('Folio', 'id_type_oclc')
         records = []
+        counter = 0
         for instance in instances:
+            counter += 1
             if not 'statusId' in instance:
                 continue
             for identifier in instance['identifiers']:
@@ -47,10 +49,7 @@ class Folio:
                     # only use the first OCLC num found for each identifier
                     break
         
-        if len(records):
-            log.info(f"Found updated FOLIO records: {records}")
-        else:
-            log.info("No updated FOLIO records found")
+        log.info(f"Found {counter:,} updated FOLIO records, with {len(records):,} to process in OCLC.")
         return records
 
     def _api_get_updated_instances(self, updated_date):
