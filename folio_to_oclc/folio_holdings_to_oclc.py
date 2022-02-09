@@ -80,15 +80,15 @@ class FolioHoldingsToOclc:
     def _load_test_records(self):
         records = []
         test_oclc_nums_to_set = self.config.get("Testing", "test_records_to_set", fallback=None)
-        test_oclc_nums_to_unset = self.config.get("Testing", "test_records_to_unset", fallback=None)
-        if test_oclc_nums_to_set or test_oclc_nums_to_unset:
+        test_oclc_nums_to_withdraw = self.config.get("Testing", "test_records_to_withdraw", fallback=None)
+        if test_oclc_nums_to_set or test_oclc_nums_to_withdraw:
             # TESTING PURPOSES: Ignore FOLIO and use these numbers instead.
             if test_oclc_nums_to_set:
                 log.warning("Using TEST OCLC numbers to SET: " + test_oclc_nums_to_set)
                 records.extend([Record(num.strip(','), Record.InstanceStatus.SET) for num in test_oclc_nums_to_set.split(" ")])
-            if test_oclc_nums_to_unset:
-                log.warning("Using TEST OCLC numbers to UNSET: " + test_oclc_nums_to_unset)
-                records.extend([Record(num.strip(','), Record.InstanceStatus.WITHDRAWN) for num in test_oclc_nums_to_unset.split(" ")])
+            if test_oclc_nums_to_withdraw:
+                log.warning("Using TEST OCLC numbers to WITHDRAW: " + test_oclc_nums_to_withdraw)
+                records.extend([Record(num.strip(','), Record.InstanceStatus.WITHDRAWN) for num in test_oclc_nums_to_withdraw.split(" ")])
         return records if len(records) else None
 
 def main():
