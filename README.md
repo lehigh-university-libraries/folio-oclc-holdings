@@ -26,6 +26,8 @@ For connecting to and using the FOLIO APIs.  All properties are **required**.  N
 
 - `id_type_oclc` is UUID for the FOLIO "identifier type" corresponding to an OCLC number.   Can be determined from a call to the FOLIO [Get /identifier-types](https://s3.amazonaws.com/foliodocs/api/mod-inventory-storage/p/identifier-type.html#identifier_types_get) API.
 
+- `instances_limit` defines the maximum number of updated instances that the FOLIO API should return.  Set this to a number greater than your maximum number of potential updates per day.  See [API documentation for limit parameter](https://s3.amazonaws.com/foliodocs/api/mod-inventory/p/inventory.html#inventory_instances_get) for the theoretical maximum of 2 billion.
+
 ### Oclc Section
 
 Properties to connect to the OCLC API.  Both properties are **required**.
