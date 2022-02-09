@@ -36,25 +36,34 @@ class FolioHoldingsToOclc:
             self.config.log_file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
             log.addHandler(self.config.log_file_handler)
 
-    def run_yesterdays_holdings(self):
-        log.debug("Running yesterday's holdings")
-        yesterday = date.today() - timedelta(days=1)
-        self.run_holdings_for_date(yesterday)
-
-    def run_holdings_for_date(self, date):
-        job_description = "Setting & withdrawing holdings updated on date: " + str(date)
-        log.debug(job_description)
-
+    def run(self):
+        """ Run a holdings update process.  Use yesterday's updated records, or test records if specified"""
         test_records = self._load_test_records()
         if test_records:
             records = test_records
             job_description = "Setting & withdrawing holdings on specified test records"
         else:
-            # Get from FOLIO the list of updated holdings.
-            log.debug("Using FOLIO")
-            self.folio = Folio(self.config)
-            records = self.folio.get_updated_records(date)
+            # (records, job_description) = self.load_records_updated_yesterday()
+            # TESTING PURPOSES: 
+            (records, job_description) = self.load_records_updated_on_date("2022-01-10")
 
+        results = self.send_updates_to_oclc(records)
+        self.email_results(results, job_description)
+
+    def load_records_updated_yesterday(self):
+        log.debug("Loading yesterday's updated records")
+        yesterday = date.today() - timedelta(days=1)
+        return self.load_records_updated_on_date(yesterday)
+
+    def load_records_updated_on_date(self, date):
+        job_description = "Setting & withdrawing holdings updated on date: " + str(date)
+        log.debug(job_description)
+
+        self.folio = Folio(self.config)
+        records = self.folio.get_updated_records(date)
+        return (records, job_description)
+
+    def send_updates_to_oclc(self, records):
         # Submit those to OCLC.
         results = []
         oclc = Oclc(self.config)
@@ -62,6 +71,9 @@ class FolioHoldingsToOclc:
             result = oclc.update_holding(record)
             results.append(result)
         log.debug("Finished setting and/or deleting holdings data.")
+        return results
+
+    def email_results(self, results, job_description):
         log.info(f"Results: {results}")
         self._emailer.send_results(results, job_description)
 
@@ -85,9 +97,7 @@ def main():
     args = parser.parse_args()
 
     holdings_to_oclc = FolioHoldingsToOclc(args.config_file)
-    # holdings_to_oclc.run_yesterdays_holdings()
-    # TESTING PURPOSES: 
-    holdings_to_oclc.run_holdings_for_date("2022-01-10")
+    holdings_to_oclc.run()
 
 if __name__ == '__main__':
     try:

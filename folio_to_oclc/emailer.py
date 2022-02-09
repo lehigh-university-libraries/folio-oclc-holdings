@@ -43,6 +43,7 @@ class Emailer:
             msg['To'] = self._to_address
 
             server.send_message(msg)
+            log.debug("Emailed results")
 
     def _filter_results(self, results, success, operation):
         return [result for result in results if result.success == success and result.operation == operation]
