@@ -75,7 +75,7 @@ class Oclc:
         # Skip the submit if the holding is already set
         if self.check_holding(oclc_number):
             return self._result(operation=HoldingUpdateResult.Operation.SET, success=False, 
-                message=f"Failed to set holdings for record  {oclc_number}. Holdings already set.")   
+                message=f"Failed to set holdings for record {oclc_number}. Holdings already set.")   
 
         url = f"{Oclc.SERVICE_URL}/ih/data?oclcNumber={oclc_number}"
         response = self._session.post(url, headers=Oclc.HEADER_ACCEPT_JSON) 
