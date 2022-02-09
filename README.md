@@ -5,7 +5,7 @@ Set and withdraw holdings in OCLC based on recently updated FOLIO records.  The 
 
 ## Dependencies
 
-The tool requires Python 2.x+.
+The tool requires Python 3.x+.
 
 ### Install from PIP
   - requests
