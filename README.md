@@ -26,6 +26,10 @@ For connecting to and using the FOLIO APIs.  All properties are **required**.  N
 
 - `id_type_oclc` is UUID for the FOLIO "identifier type" corresponding to an OCLC number.   Can be determined from a call to the FOLIO [Get /identifier-types](https://s3.amazonaws.com/foliodocs/api/mod-inventory-storage/p/identifier-type.html#identifier_types_get) API.
 
+### Oclc Section
+
+Properties to connect to the OCLC API.  Both properties are **required**.
+
 ### Email Section
 
 For sending a report email after operation.  All properties are **required**.
