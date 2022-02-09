@@ -1,5 +1,6 @@
 *.log
 *.properties
+!example.properties
 *.pyc
 .env
 launch.json
