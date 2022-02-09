@@ -42,11 +42,13 @@ class FolioHoldingsToOclc:
         self.run_holdings_for_date(yesterday)
 
     def run_holdings_for_date(self, date):
-        log.debug("Running holdings for date: " + str(date))
+        job_description = "Setting & withdrawing holdings updated on date: " + str(date)
+        log.debug(job_description)
 
         test_records = self._load_test_records()
         if test_records:
             records = test_records
+            job_description = "Setting & withdrawing holdings on specified test records"
         else:
             # Get from FOLIO the list of updated holdings.
             log.debug("Using FOLIO")
@@ -61,7 +63,7 @@ class FolioHoldingsToOclc:
             results.append(result)
         log.debug("Finished setting and/or deleting holdings data.")
         log.info(f"Results: {results}")
-        self._emailer.send_results(results)
+        self._emailer.send_results(results, job_description)
 
     def _load_test_records(self):
         records = []

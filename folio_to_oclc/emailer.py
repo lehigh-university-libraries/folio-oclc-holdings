@@ -17,8 +17,8 @@ class Emailer:
         self._from_name = config.get("Email", "from_name")
         self._to_address = config.get("Email", "to_address")
 
-    def send_results(self, results: list):
-        message_body = ""
+    def send_results(self, results: list, job_description: str):
+        message_body = job_description
 
         successful_sets = self._filter_results(results, True, HoldingUpdateResult.Operation.SET)
         message_body += self._format_results_message(successful_sets, "Successful Sets")
