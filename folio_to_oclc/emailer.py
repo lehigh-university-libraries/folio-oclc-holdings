@@ -1,6 +1,7 @@
 import logging
 import smtplib
 from email.message import EmailMessage
+from datetime import datetime
 
 from data import HoldingUpdateResult
 
@@ -31,7 +32,7 @@ class Emailer:
         message_body += self._format_results_message(failed_widthdraws, "Failure Withdraws")
 
         subject = f"Holdings to OCLC: {len(failed_sets) + len(failed_widthdraws)} failure(s) " \
-            f"and {len(successful_sets) + len(successful_widthdraws)} success(es)"
+            f"and {len(successful_sets) + len(successful_widthdraws)} success(es) at {datetime.now()}"
 
         with smtplib.SMTP("localhost") as server:
             msg = EmailMessage()
