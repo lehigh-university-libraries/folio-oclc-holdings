@@ -50,8 +50,7 @@ class Emailer:
     def _format_results_message(self, results, heading):
         message = ""
         if len(results):
-            message += f"\n{heading}:"
+            message += f"\n\n{heading}:"
             for result in results:
-                message += f"\n{result}"
+                message += f"\n- {result}"
         return message
-
