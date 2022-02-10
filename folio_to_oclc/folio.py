@@ -49,7 +49,7 @@ class Folio:
                     # only use the first OCLC num found for each identifier
                     break
         
-        records_summary = f"Found {counter:,} updated FOLIO records, with {len(records):,} to eitiher set or withdraw in OCLC."
+        records_summary = f"Found {counter:,} updated FOLIO records, with {len(records):,} to either set or withdraw in OCLC."
         log.info(records_summary)
         return (records, records_summary)
 
