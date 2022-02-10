@@ -38,16 +38,20 @@ class FolioHoldingsToOclc:
         else:
             self.config.log_file_handler = logging.NullHandler()
 
-    def run(self):
-        """ Run a holdings update process.  Use yesterday's updated records, or test records if specified"""
+    def run(self, query_date=None):
+        """ Run a holdings update process.  
+        
+        Use yesterday's updated records, or a given date's record if specified, 
+        or test records if specified in the config file.
+        """
         test_records = self._load_test_records()
         if test_records:
             records = test_records
             job_description = "Setting & withdrawing holdings on specified test records"
+        elif query_date:
+            (records, job_description) = self.load_records_updated_on_date(query_date)
         else:
-            # (records, job_description) = self.load_records_updated_yesterday()
-            # TESTING PURPOSES: 
-            (records, job_description) = self.load_records_updated_on_date("2022-01-10")
+            (records, job_description) = self.load_records_updated_yesterday()
 
         results = self.send_updates_to_oclc(records)
         self.email_results(results, job_description)
@@ -96,11 +100,12 @@ class FolioHoldingsToOclc:
 
 def main():
     parser = argparse.ArgumentParser(description="Set or delete FOLIO holdings in OCLC.")
-    parser.add_argument('-c,', '--config', dest='config_file', required=True, help='path to the properties file')
+    parser.add_argument('-c,', '--config', dest='config_file', required=True, help='Path to the properties file')
+    parser.add_argument('-d', '--date', dest='query_date', type=date.fromisoformat, help='Date of FOLIO updates to query, format YYYY-MM-DD.  Default is yesterday.')
     args = parser.parse_args()
 
     holdings_to_oclc = FolioHoldingsToOclc(args.config_file)
-    holdings_to_oclc.run()
+    holdings_to_oclc.run(args.query_date)
 
 if __name__ == '__main__':
     try:
