@@ -12,7 +12,7 @@ from data import Record
 
 logging.basicConfig()
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
 class FolioHoldingsToOclc:
     """ Get recent holdings from FOLIO and submit them to OCLC. """
@@ -24,7 +24,7 @@ class FolioHoldingsToOclc:
         self.config = configparser.ConfigParser()
         self.config.read(config_file)
         self._init_log()
-        log.info(f"Initilalized with config file {config_file}")
+        log.info(f"Initialized with config file {config_file}")
         # Note: Config contains the wskey and secret.  Consider logging destinations.
         # print("Config: ", {section: dict(self.config[section]) for section in self.config.sections()})
         self._emailer = Emailer(self.config)
@@ -63,7 +63,7 @@ class FolioHoldingsToOclc:
 
     def load_records_updated_on_date(self, date):
         job_description = f"Setting & withdrawing holdings updated on date: {date}."
-        log.debug(job_description)
+        log.info(job_description)
 
         self.folio = Folio(self.config)
         (records, records_summary) = self.folio.get_updated_records(date)
@@ -81,7 +81,7 @@ class FolioHoldingsToOclc:
         return results
 
     def email_results(self, results, job_description):
-        log.info(f"Results: {results}")
+        log.debug(f"Results: {results}")
         self._emailer.send_results(results, job_description)
 
     def _load_test_records(self):

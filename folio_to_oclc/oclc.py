@@ -7,7 +7,7 @@ from oauthlib.oauth2 import BackendApplicationClient
 from data import FolioOclcHoldingsError, Record, HoldingUpdateResult
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
 class Oclc:
     """ Submit updated holdings via the OCLC API. """
@@ -52,7 +52,7 @@ class Oclc:
         url = f"{Oclc.SERVICE_URL}/ih/checkholdings?oclcNumber={oclc_number}";
         response = self._session.get(url, headers=Oclc.HEADER_ACCEPT_JSON)
         if response.status_code == 404:
-            log.info(f"Record was not found in OCLC: {oclc_number}")
+            log.debug(f"Record was not found in OCLC: {oclc_number}")
             return False
         else:
             response.raise_for_status()

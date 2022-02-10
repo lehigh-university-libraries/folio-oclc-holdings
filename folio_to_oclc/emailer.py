@@ -6,7 +6,7 @@ from datetime import datetime
 from data import HoldingUpdateResult
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
 class Emailer:
     """ Send holding change results to email recipients. """
@@ -43,7 +43,7 @@ class Emailer:
             msg['To'] = self._to_address
 
             server.send_message(msg)
-            log.debug(f"Emailed results to {self._to_address}")
+            log.info(f"Emailed results to {self._to_address}")
 
     def _filter_results(self, results, success, operation):
         return [result for result in results if result.success == success and result.operation == operation]

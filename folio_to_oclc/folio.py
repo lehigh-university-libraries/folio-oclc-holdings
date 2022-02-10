@@ -4,7 +4,7 @@ from folioclient.FolioClient import FolioClient
 from data import Record
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
 class Folio:
     """ Get updated holdings via the FOLIO API. """
