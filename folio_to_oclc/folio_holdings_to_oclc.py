@@ -58,11 +58,12 @@ class FolioHoldingsToOclc:
         return self.load_records_updated_on_date(yesterday)
 
     def load_records_updated_on_date(self, date):
-        job_description = "Setting & withdrawing holdings updated on date: " + str(date)
+        job_description = f"Setting & withdrawing holdings updated on date: {date}."
         log.debug(job_description)
 
         self.folio = Folio(self.config)
-        records = self.folio.get_updated_records(date)
+        (records, records_summary) = self.folio.get_updated_records(date)
+        job_description += f"  {records_summary}"
         return (records, job_description)
 
     def send_updates_to_oclc(self, records):

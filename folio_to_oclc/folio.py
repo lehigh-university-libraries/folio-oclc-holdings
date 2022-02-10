@@ -49,8 +49,9 @@ class Folio:
                     # only use the first OCLC num found for each identifier
                     break
         
-        log.info(f"Found {counter:,} updated FOLIO records, with {len(records):,} to process in OCLC.")
-        return records
+        records_summary = f"Found {counter:,} updated FOLIO records, with {len(records):,} to eitiher set or withdraw in OCLC."
+        log.info(records_summary)
+        return (records, records_summary)
 
     def _api_get_updated_instances(self, updated_date):
         instances_limit = self._config.get("Folio", "instances_limit")
