@@ -2,6 +2,7 @@
 
 Set and withdraw holdings in OCLC based on recently updated FOLIO records.  The tool utilizes the FOLIO and OCLC APIs and is intended to run daily via a scheduled task / cron.  It has no UI but emails out a report when complete.
 
+The specific FOLIO records to review are loaded via the [GET /inventory/instances](https://s3.amazonaws.com/foliodocs/api/mod-inventory/p/inventory.html#inventory_instances_get) API with a query on a specific `statusUpdatedDate`.  By default, yesterday's date is used.  Another date may be specified as a [command line argument](#command-line-arguments).
 
 ## Dependencies
 
@@ -44,18 +45,24 @@ Program output is written to the specified `log_file`.  All properties are **opt
 
 For testing OCLC operations against specific records (see details).  All properties are **optional**.
 
-- `test_records_to_set` and `test_records_to_withdraw` are each comma-separarted lists of OCLC numbers.  If either or both properties are set, the tool will set or withdraw (respectively) holdings for the specified OCLC numbers.  No connection to FOLIO will be made.
+- `test_records_to_set` and `test_records_to_withdraw` are each comma-separated lists of OCLC numbers.  If either or both properties are set, the tool will set or withdraw (respectively) holdings for the specified OCLC numbers.  No connection to FOLIO will be made.
 
 ## How to Run
 
-### From Command Line
+### Basic Operation
 
 py .\folio_to_oclc\folio_holdings_to_oclc.py --config=CONFIG_FILE
 
+### Command Line Arguments
 
+    usage: folio_holdings_to_oclc.py [-h] -c, CONFIG_FILE [-d QUERY_DATE]
 
-### From Another Module
+    Set or delete FOLIO holdings in OCLC.
 
-import foliio_holdings_to_oclc  
-app = folio_holdings_to_oclc.FolioHoldingsToOclc(CONFIG_FILE)  
-app.run() 
+    options:
+      -h, --help            show this help message and exit
+      -c, CONFIG_FILE, --config CONFIG_FILE
+                            Path to the properties file
+      -d QUERY_DATE, --date QUERY_DATE
+                            Date of FOLIO updates to query, format YYYY-MM-DD.
+                            Default is yesterday.
