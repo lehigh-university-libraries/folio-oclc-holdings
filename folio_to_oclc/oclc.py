@@ -4,7 +4,7 @@ from requests.auth import HTTPBasicAuth
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
 
-from data import FolioOclcHoldingsError, Record, HoldingUpdateResult
+from data import Record, HoldingUpdateResult
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
@@ -20,16 +20,7 @@ class Oclc:
     def __init__(self, config):
         self._config = config
         log.addHandler(self._config.log_file_handler)
-        self._init_oclc_metadata()
         self._session = self._init_connection()
-
-    def _init_oclc_metadata(self):
-        # Not yet needed; may remove.
-        # self._inst_symbol = self._config.get('Oclc', 'inst_symbol', fallback=None)
-        # self._inst_registry_id = self._config.get('Oclc', 'inst_registry_id', fallback=None)
-        # if not self._inst_symbol and not self._inst_registry_id:
-        #     raise FolioOclcHoldingsError("Properties must define either inst_registry_id or inst_symbol.")
-        pass
 
     def _init_connection(self):
         WS_KEY = self._config.get('Oclc', 'ws_key')
