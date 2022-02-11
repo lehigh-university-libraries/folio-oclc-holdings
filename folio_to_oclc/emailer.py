@@ -35,7 +35,7 @@ class Emailer:
         subject = f"Holdings to OCLC: {len(failed_sets) + len(failed_widthdraws)} failure(s) " \
             f"and {len(successful_sets) + len(successful_widthdraws)} success(es) at {datetime.now()}"
 
-        with smtplib.SMTP("localhost") as server:
+        with smtplib.SMTP(self._smtp_host) as server:
             msg = EmailMessage()
             msg.set_content(message_body)
             msg['Subject'] = subject
