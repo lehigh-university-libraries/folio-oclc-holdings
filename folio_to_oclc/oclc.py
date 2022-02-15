@@ -3,6 +3,7 @@ from xmlrpc.client import SERVER_ERROR
 from requests.auth import HTTPBasicAuth
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
+import time
 
 from data import Record, HoldingUpdateResult
 
@@ -16,30 +17,41 @@ class Oclc:
     SERVICE_URL = "https://worldcat.org"
     TOKEN_URL = "https://oauth.oclc.org/token"
     HEADER_ACCEPT_JSON = { "Accept" : "application/json" }
+    SESSION_BUFFER = 60 #seconds
 
     def __init__(self, config):
         self._config = config
         log.addHandler(self._config.log_file_handler)
-        self._session = self._init_connection()
+        self._init_connection()
 
     def _init_connection(self):
         WS_KEY = self._config.get('Oclc', 'ws_key')
         SECRET = self._config.get('Oclc', 'secret')
 
-        basic_auth = HTTPBasicAuth(WS_KEY, SECRET)
+        self._basic_auth = HTTPBasicAuth(WS_KEY, SECRET)
         client = BackendApplicationClient(client_id=WS_KEY, scope=Oclc.SCOPES)
-        session = OAuth2Session(client=client)
+        self._session = OAuth2Session(client=client)
+        self._get_token()
+
+    def _get_token(self):
         try:
-            self._token = session.fetch_token(token_url=Oclc.TOKEN_URL, auth=basic_auth)
+            self._token = self._session.fetch_token(token_url=Oclc.TOKEN_URL, auth=self._basic_auth)
             log.debug("Got token.")
         except Exception as e:
             log.error("Error when trying to get token: " + str(e))
             raise e
 
-        return session
+    def _check_connection(self):
+        """ Renew the connection if it is close to expiring. """
+
+        if self._token['expires_at'] - time.time() <= Oclc.SESSION_BUFFER:
+            log.info("Session close to expiring.  Renewing token.")
+            self._get_token()
 
     def check_holding(self, oclc_number: str):
         """ Check holding status of a single OCLC number. """
+
+        self._check_connection()
         url = f"{Oclc.SERVICE_URL}/ih/checkholdings?oclcNumber={oclc_number}";
         response = self._session.get(url, headers=Oclc.HEADER_ACCEPT_JSON)
         if response.status_code == 404:
@@ -68,6 +80,7 @@ class Oclc:
             return self._result(operation=HoldingUpdateResult.Operation.SET, success=False, 
                 message=f"Failed to set holdings for record {oclc_number}. Holdings already set.")   
 
+        self._check_connection()
         url = f"{Oclc.SERVICE_URL}/ih/data?oclcNumber={oclc_number}"
         response = self._session.post(url, headers=Oclc.HEADER_ACCEPT_JSON) 
         log.debug(f"OCLC response status: {response.status_code}")
@@ -86,6 +99,7 @@ class Oclc:
             return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=False, 
                 message=f"Failed to delete holdings for record {oclc_number}. Holdings not set on record.")
 
+        self._check_connection()
         url = f"{Oclc.SERVICE_URL}/ih/data?oclcNumber={oclc_number}&cascade=0"
         response = self._session.delete(url, headers=Oclc.HEADER_ACCEPT_JSON) 
         log.debug(f"OCLC response status: {response.status_code}")
