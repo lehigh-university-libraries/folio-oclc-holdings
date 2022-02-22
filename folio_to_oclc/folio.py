@@ -56,7 +56,7 @@ class Folio:
     def _api_get_updated_instances(self, updated_date):
         instances_limit = self._config.get("Folio", "instances_limit")
         path = "/inventory/instances"
-        params = f'?query=(statusUpdatedDate=={updated_date}*)&limit={instances_limit}'
+        params = f'?limit={instances_limit}&query=(statusUpdatedDate=={updated_date}*)'
         result = self.client.folio_get(path, query = params)
         instances = result['instances']
         return instances
