@@ -12,8 +12,13 @@ class Record:
         self.instance_status = instance_status
 
     def _numeric(self):
+        """ 
+        Strip the leading (OcoLc).
+        Also strip any leading zeroes on the number. Testing shows that numbers with leading zeroes
+        are not the "current" OCLC number, and thus the holdings API calls with those numbers fail.
+        """
         for index, char in enumerate(self._raw_oclc_number):
-            if char.isdigit():
+            if char.isdigit() and int(char) != 0:
                 return self._raw_oclc_number[index:]
     
     def __repr__(self):
