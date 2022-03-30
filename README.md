@@ -23,6 +23,8 @@ flowchart TD
     FTO -- Step 3 --> Email>Email Report]
         --> Recipieints[/Recipients/]
     
+    Cron["Task Scheduler:<br/>Run Daily"] --> FTO
+
 ``` 
 
 ## Dependencies
