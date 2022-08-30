@@ -49,20 +49,29 @@ class Oclc:
             self._get_token()
 
     def check_holding(self, oclc_number: str):
-        """ Check holding status of a single OCLC number. """
+        """ Check holding status of a single OCLC number.  Return the an object indicating
+        whether or not holding is set and the currentOclcNumber. """
 
         self._check_connection()
         url = f"{Oclc.SERVICE_URL}/ih/checkholdings?oclcNumber={oclc_number}";
         response = self._session.get(url, headers=Oclc.HEADER_ACCEPT_JSON)
         if response.status_code == 404:
             log.debug(f"Record was not found in OCLC: {oclc_number}")
-            return False
+            return CheckHoldingResult(False, None)
         else:
             response.raise_for_status()
         result = response.json()
         is_holding_set = result['isHoldingSet']
-        log.debug(f"Checked holdings for {oclc_number}: {is_holding_set}; response: {result}")
-        return is_holding_set
+        current_oclc_number = result['currentOclcNumber']
+        if not is_holding_set:
+            log.debug(f"Checked holdings for {oclc_number}: Not set.")
+            return CheckHoldingResult(False, current_oclc_number);
+        else:
+            if current_oclc_number == oclc_number:
+                log.debug(f"Checked holdings for {oclc_number}: Set.")
+            else:
+                log.debug(f"Checked holdings for {oclc_number}: Set with new OCLC number: {current_oclc_number}.")
+            return CheckHoldingResult(True, current_oclc_number)
 
     def update_holding(self, record: Record) -> HoldingUpdateResult:
         if record.instance_status == Record.InstanceStatus.SET:
@@ -75,10 +84,15 @@ class Oclc:
     def set_holding(self, oclc_number: str):
         """ Set an institution holding for a single OCLC number. """
 
+        check_holding_result = self.check_holding(oclc_number)
+
         # Skip the submit if the holding is already set
-        if self.check_holding(oclc_number):
+        if check_holding_result.is_set:
             return self._result(operation=HoldingUpdateResult.Operation.SET, success=False, 
                 message=f"Failed to set holdings for record {oclc_number}. Holdings already set.")   
+
+        # Use newer OCLC number if applicable
+        oclc_number = check_holding_result.current_oclc_number
 
         self._check_connection()
         url = f"{Oclc.SERVICE_URL}/ih/data?oclcNumber={oclc_number}"
@@ -94,10 +108,15 @@ class Oclc:
     def delete_holding(self, oclc_number: str):
         """ Delete an institution holding for a single OCLC number. """
 
+        check_holding_result = self.check_holding(oclc_number)
+
         # Skip the submit if the holding is already unset
-        if not self.check_holding(oclc_number):
+        if not check_holding_result.is_set:
             return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=False, 
                 message=f"Failed to delete holdings for record {oclc_number}. Holdings not set on record.")
+        
+        # Use newer OCLC number if applicable
+        oclc_number = check_holding_result.current_oclc_number
 
         self._check_connection()
         url = f"{Oclc.SERVICE_URL}/ih/data?oclcNumber={oclc_number}&cascade=0"
@@ -118,3 +137,9 @@ class Oclc:
         result = HoldingUpdateResult(operation, success, message)
         log.info(result.message)
         return result
+
+class CheckHoldingResult:
+
+    def __init__(self, is_set: bool, current_oclc_number: str):
+        self.is_set = is_set
+        self.current_oclc_number = current_oclc_number
