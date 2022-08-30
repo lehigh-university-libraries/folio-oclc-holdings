@@ -49,7 +49,7 @@ class Oclc:
             self._get_token()
 
     def check_holding(self, oclc_number: str):
-        """ Check holding status of a single OCLC number.  Return the an object indicating
+        """ Check holding status of a single OCLC number.  Return an object indicating
         whether or not holding is set and the currentOclcNumber. """
 
         self._check_connection()
