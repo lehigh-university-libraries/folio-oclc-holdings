@@ -53,8 +53,11 @@ class Oclc:
         whether or not holding is set and the currentOclcNumber. """
 
         self._check_connection()
-        url = f"{Oclc.SERVICE_URL}/ih/checkholdings?oclcNumber={oclc_number}";
+        url = f"{Oclc.SERVICE_URL}/ih/checkholdings?oclcNumber={oclc_number}"
         response = self._session.get(url, headers=Oclc.HEADER_ACCEPT_JSON)
+        log.debug("request url from response: " + str(response.request.url))
+        log.debug("request headers from response: " + str(response.request.headers))
+        log.debug("response text: " + str(response.text))
         if response.status_code == 404:
             log.debug(f"Record was not found in OCLC: {oclc_number}")
             return CheckHoldingResult(False, None)
