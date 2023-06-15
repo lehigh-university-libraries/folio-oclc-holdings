@@ -20,17 +20,17 @@ class Emailer:
     def send_results(self, results: list, job_description: str):
         message_body = job_description
 
-        successful_sets = self._filter_results(results, True, HoldingUpdateResult.Operation.SET)
-        message_body += self._format_results_message(successful_sets, "Successfully Set")
-
         failed_sets = self._filter_results(results, False, HoldingUpdateResult.Operation.SET)
         message_body += self._format_results_message(failed_sets, "Failure to Set")
 
-        successful_widthdraws = self._filter_results(results, True, HoldingUpdateResult.Operation.WITHDRAW)
-        message_body += self._format_results_message(successful_widthdraws, "Successfully Withdrawn")
-
         failed_widthdraws = self._filter_results(results, False, HoldingUpdateResult.Operation.WITHDRAW)
         message_body += self._format_results_message(failed_widthdraws, "Failure to Withdraw")
+
+        successful_sets = self._filter_results(results, True, HoldingUpdateResult.Operation.SET)
+        message_body += self._format_results_message(successful_sets, "Successfully Set")
+
+        successful_widthdraws = self._filter_results(results, True, HoldingUpdateResult.Operation.WITHDRAW)
+        message_body += self._format_results_message(successful_widthdraws, "Successfully Withdrawn")
 
         subject = f"Holdings to OCLC: {len(failed_sets) + len(failed_widthdraws)} failure(s) " \
             f"and {len(successful_sets) + len(successful_widthdraws)} success(es) at {datetime.now()}"
