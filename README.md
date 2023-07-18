@@ -4,6 +4,8 @@ Set and withdraw holdings in OCLC based on recently updated FOLIO records.  The 
 
 The specific FOLIO records to review are loaded via the [GET /inventory/instances](https://s3.amazonaws.com/foliodocs/api/mod-inventory/p/inventory.html#inventory_instances_get) API with a query on a specific `statusUpdatedDate`.  By default, yesterday's date is used.  Another date may be specified as a [command line argument](#command-line-arguments).
 
+The OCLC records are updated via the [WorldCat Metadata API v2](https://developer.api.oclc.org/wc-metadata-v2).
+
 ## Basic Operation
 
 ``` mermaid

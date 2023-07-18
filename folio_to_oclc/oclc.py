@@ -11,10 +11,10 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
 class Oclc:
-    """ Submit updated holdings via the OCLC API. """
+    """ Submit updated holdings via the WorldCat Metadata API v2. """
 
     SCOPES = ['WorldCatMetadataAPI']
-    SERVICE_URL = "https://worldcat.org"
+    SERVICE_URL = "https://metadata.api.oclc.org/worldcat"
     TOKEN_URL = "https://oauth.oclc.org/token"
     HEADER_ACCEPT_JSON = { "Accept" : "application/json" }
     SESSION_BUFFER = 60 #seconds
@@ -53,20 +53,24 @@ class Oclc:
         whether or not holding is set and the currentOclcNumber. """
 
         self._check_connection()
-        url = f"{Oclc.SERVICE_URL}/ih/checkholdings?oclcNumber={oclc_number}"
+        url = f"{Oclc.SERVICE_URL}/manage/institution/holdings/current?oclcNumbers={oclc_number}"
         response = self._session.get(url, headers=Oclc.HEADER_ACCEPT_JSON)
         log.debug("request url from response: " + str(response.request.url))
         log.debug("request headers from response: " + str(response.request.headers))
         log.debug("response text: " + str(response.text))
-        if response.status_code == 404:
+        if response.status_code == 404: # Appears no longer used in API v2, but leaving just in case
             log.debug(f"Record was not found in OCLC: {oclc_number}")
             return CheckHoldingResult(False, None)
         else:
             response.raise_for_status()
         result = response.json()
-        is_holding_set = result['isHoldingSet']
-        current_oclc_number = result['currentOclcNumber']
-        if not is_holding_set:
+        holdings = result['holdings'][0]
+        is_holding_set = holdings['holdingSet']
+        current_oclc_number = holdings['currentControlNumber']
+        if not current_oclc_number:
+            log.debug(f"Record was not found in OCLC: {oclc_number}")
+            return CheckHoldingResult(False, None)
+        elif not is_holding_set:
             log.debug(f"Checked holdings for {oclc_number}: Not set.")
             return CheckHoldingResult(False, current_oclc_number);
         else:
@@ -98,10 +102,10 @@ class Oclc:
         oclc_number = check_holding_result.current_oclc_number
 
         self._check_connection()
-        url = f"{Oclc.SERVICE_URL}/ih/data?oclcNumber={oclc_number}"
+        url = f"{Oclc.SERVICE_URL}/manage/institution/holdings/{oclc_number}/set"
         response = self._session.post(url, headers=Oclc.HEADER_ACCEPT_JSON) 
         log.debug(f"OCLC response status: {response.status_code}")
-        if response.status_code == 201:
+        if response.status_code == 200:
             return self._result(operation=HoldingUpdateResult.Operation.SET, success=True, 
                 message=f"Holdings successfully set for record {oclc_number}")
         else:
@@ -109,7 +113,7 @@ class Oclc:
                 message=f"Failed to set holdings for record  {oclc_number}. Unexpected status code: {response.status_code}.")                        
 
     def delete_holding(self, oclc_number: str):
-        """ Delete an institution holding for a single OCLC number. """
+        """ Delete (unset) an institution holding for a single OCLC number. """
 
         check_holding_result = self.check_holding(oclc_number)
 
@@ -122,8 +126,8 @@ class Oclc:
         oclc_number = check_holding_result.current_oclc_number
 
         self._check_connection()
-        url = f"{Oclc.SERVICE_URL}/ih/data?oclcNumber={oclc_number}&cascade=0"
-        response = self._session.delete(url, headers=Oclc.HEADER_ACCEPT_JSON) 
+        url = f"{Oclc.SERVICE_URL}/manage/institution/holdings/{oclc_number}/unset"
+        response = self._session.post(url, headers=Oclc.HEADER_ACCEPT_JSON) 
         log.debug(f"OCLC response status: {response.status_code}")
         if response.status_code == 200:
             return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=True, 
