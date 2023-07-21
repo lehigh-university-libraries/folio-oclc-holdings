@@ -128,17 +128,14 @@ class Oclc:
         self._check_connection()
         url = f"{Oclc.SERVICE_URL}/manage/institution/holdings/{oclc_number}/unset"
         response = self._session.post(url, headers=Oclc.HEADER_ACCEPT_JSON) 
-        log.debug(f"OCLC response status: {response.status_code}")
-        if response.status_code == 200:
+        result = response.json()
+        if result['success']:
             return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=True, 
                 message=f"Holdings successfully deleted for record {oclc_number}")
-        elif response.status_code == 409:
-            return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=False, 
-                message=f"Failed to delete holdings for record {oclc_number} with status code {response.status_code}. "\
-                    "Your institution may have one or more local holdings records linked to this record.")                        
         else:
-            return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=False,
-                message=f"Failed to delete holdings for record {oclc_number}. Unexpected status code:  {response.status_code}.")                        
+            return self._result(operation=HoldingUpdateResult.Operation.WITHDRAW, success=False, 
+                message=f"Failed to delete holdings for record {oclc_number} with status code {response.status_code} "\
+                    f"and message {result['message']}")
 
     def _result(self, operation, success, message):
         result = HoldingUpdateResult(operation, success, message)
