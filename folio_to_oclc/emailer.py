@@ -23,17 +23,17 @@ class Emailer:
         failed_sets = self._filter_results(results, False, HoldingUpdateResult.Operation.SET)
         message_body += self._format_results_message(failed_sets, "Failure to Set")
 
-        failed_widthdraws = self._filter_results(results, False, HoldingUpdateResult.Operation.WITHDRAW)
-        message_body += self._format_results_message(failed_widthdraws, "Failure to Withdraw")
+        failed_withdraws = self._filter_results(results, False, HoldingUpdateResult.Operation.WITHDRAW)
+        message_body += self._format_results_message(failed_withdraws, "Failure to Withdraw")
 
         successful_sets = self._filter_results(results, True, HoldingUpdateResult.Operation.SET)
         message_body += self._format_results_message(successful_sets, "Successfully Set")
 
-        successful_widthdraws = self._filter_results(results, True, HoldingUpdateResult.Operation.WITHDRAW)
-        message_body += self._format_results_message(successful_widthdraws, "Successfully Withdrawn")
+        successful_withdraws = self._filter_results(results, True, HoldingUpdateResult.Operation.WITHDRAW)
+        message_body += self._format_results_message(successful_withdraws, "Successfully Withdrawn")
 
-        subject = f"Holdings to OCLC: {len(failed_sets) + len(failed_widthdraws)} failure(s) " \
-            f"and {len(successful_sets) + len(successful_widthdraws)} success(es) at {datetime.now()}"
+        subject = f"Holdings to OCLC: {len(failed_sets) + len(failed_withdraws)} failure(s) " \
+            f"and {len(successful_sets) + len(successful_withdraws)} success(es) at {datetime.now()}"
 
         with smtplib.SMTP(self._smtp_host) as server:
             msg = EmailMessage()
