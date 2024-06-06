@@ -13,7 +13,7 @@ log.setLevel(logging.INFO)
 class Oclc:
     """ Submit updated holdings via the WorldCat Metadata API v2. """
 
-    SCOPES = ['WorldCatMetadataAPI']
+    SCOPES = ['WorldCatMetadataAPI:manage_institution_holdings']
     SERVICE_URL = "https://metadata.api.oclc.org/worldcat"
     TOKEN_URL = "https://oauth.oclc.org/token"
     HEADER_ACCEPT_JSON = { "Accept" : "application/json" }
